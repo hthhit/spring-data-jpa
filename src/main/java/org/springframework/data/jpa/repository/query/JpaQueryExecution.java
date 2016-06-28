@@ -279,6 +279,24 @@ public abstract class JpaQueryExecution {
 	}
 
 	/**
+	 * {@link Execution} performing an exists check on the query.
+	 */
+	static class ExistsExecution extends JpaQueryExecution {
+
+		@Override
+		protected Object doExecute(AbstractJpaQuery query, Object[] values) {
+
+			Object result = query.createQuery(values).getSingleResult();
+
+			if(result instanceof Number) {
+				return ((Number) result).longValue() != 0;
+			}
+
+			return result;
+		}
+	}
+
+	/**
 	 * {@link Execution} executing a stored procedure.
 	 * 
 	 * @author Thomas Darimont

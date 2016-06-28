@@ -1098,6 +1098,18 @@ public class UserRepositoryTests {
 	}
 
 	/**
+	 * @see DATAJPA-231
+	 */
+	@Test
+	public void executesDerivedExistsQuery() {
+
+		flushTestUsers();
+
+		assertThat(repository.existsByLastname("Matthews"), is(true));
+		assertThat(repository.existsByLastname("Hans Peter"), is(false));
+	}
+
+	/**
 	 * @see DATAJPA-332
 	 */
 	@Test

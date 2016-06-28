@@ -26,6 +26,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.repository.query.JpaQueryExecution.DeleteExecution;
+import org.springframework.data.jpa.repository.query.JpaQueryExecution.ExistsExecution;
 import org.springframework.data.jpa.repository.query.ParameterMetadataProvider.ParameterMetadata;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.ResultProcessor;
@@ -66,7 +67,7 @@ public class PartTreeJpaQuery extends AbstractJpaQuery {
 		boolean recreationRequired = parameters.hasDynamicProjection() || parameters.potentiallySortsDynamically();
 
 		this.countQuery = new CountQueryPreparer(persistenceProvider, recreationRequired);
-		this.query = tree.isCountProjection() ? countQuery : new QueryPreparer(persistenceProvider, recreationRequired);
+		this.query = (tree.isCountProjection() || tree.isExistsProjection()) ? countQuery : new QueryPreparer(persistenceProvider, recreationRequired);
 	}
 
 	/*
@@ -94,7 +95,14 @@ public class PartTreeJpaQuery extends AbstractJpaQuery {
 	 */
 	@Override
 	protected JpaQueryExecution getExecution() {
-		return this.tree.isDelete() ? new DeleteExecution(em) : super.getExecution();
+
+		if(this.tree.isDelete()) {
+			return new DeleteExecution(em);
+		} else if(this.tree.isExistsProjection()) {
+			return new ExistsExecution();
+		}
+
+		return super.getExecution();
 	}
 
 	/**
